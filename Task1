@@ -1,0 +1,112 @@
+Task-1
+
+
+Simulation of an Event that Follows Given Biasness
+
+Problem Statement: Write a program that accepts a map of all possible outcomes of an event along with their probabilities and every occurrence of the event would generate outcomes based on the given probabilities. This could be seen as a generalization of events like rolling of a dice (could be biased) or flipping of a coin (could be biased).
+Examples
+Rolling of a six-faced biased dice
+Input: [ {1, 10}, {2, 30}, {3, 15}, {4, 15}, {5, 30}, {6, 0} ]
+Flipping of a coin
+Input [ {“Head”: 35}, {“Tail”: 65} ]
+Rules
+Input: Probabilities given are as integers and percentages.
+Each occurrence of the event should only generate one of the outcomes given in input
+The outcome of each occurrence is independent of that of others.
+On observing a large number (say 1000) of occurrences, the probability distribution should roughly follow the given biasness.
+Example
+Input: [ {1: 35}, {2: 65} ]  ## 1=Head, 2=Tail
+Output:
+On triggering the event 1000 times, Head appeared 332 times and Tail 668 times which is roughly inline with the biasness given.
+This is just one of the possibilities.
+-----------------------------------------------------------------
+Ans--
+import java.util.*;
+
+// BiasedOutcome class is a generic class that represents an outcome with its associated probability.
+class BiasedOutcome<T> {
+    private T outcome;
+    private int probability;
+
+    public BiasedOutcome(T outcome, int probability) {
+        this.outcome = outcome;
+        this.probability = probability;
+    }
+
+    public T getOutcome() {
+        return outcome;
+    }
+
+    public int getProbability() {
+        return probability;
+    }
+}
+//BiasedEvent class is another generic class that models a biased event with a list of possible outcomes
+class BiasedEvent<T> {
+    private List<BiasedOutcome<T>> outcomes = new ArrayList<>();
+    private Random random = new Random();
+   //addOutcome method used to add a new outcome with its probability to the list.
+    public void addOutcome(T outcome, int probability) {
+        outcomes.add(new BiasedOutcome<>(outcome, probability));
+    }
+//Handles simulation of events
+    public void simulateEvent(int numberOfOccurrences) {
+        int[] occurrences = new int[outcomes.size()];
+
+        for (int i = 0; i < numberOfOccurrences; i++) {
+            int outcomeIndex = generateOutcomeIndex();
+            occurrences[outcomeIndex]++;
+        }
+
+        for (int i = 0; i < outcomes.size(); i++) {
+            BiasedOutcome<T> biasedOutcome = outcomes.get(i);
+            T outcome = biasedOutcome.getOutcome();
+            System.out.println(outcome + " got appeared " + occurrences[i] + " times.");
+        }
+        System.out.println("Total occurrences in this event: " + numberOfOccurrences);
+        System.out.println();
+    }
+   //generateOutcomeIndex method is a helper method to randomly select an outcome index based on the probabilities
+    private int generateOutcomeIndex() {
+        int totalProbability = outcomes.stream().mapToInt(BiasedOutcome::getProbability).sum();
+        int randomNumber = random.nextInt(totalProbability);
+
+        int cumulativeProbability = 0;
+        for (int i = 0; i < outcomes.size(); i++) {
+            cumulativeProbability += outcomes.get(i).getProbability();
+            if (randomNumber < cumulativeProbability) {
+                return i;
+            }
+        }
+        return outcomes.size() - 1;
+    }
+}
+
+public class Main {
+
+    public static void main(String[] args) {
+        // Example: Rolling of a six-faced biased dice
+        BiasedEvent<Integer> diceEvent = new BiasedEvent<>();
+        diceEvent.addOutcome(1, 10);
+        diceEvent.addOutcome(2, 30);
+        diceEvent.addOutcome(3, 15);
+        diceEvent.addOutcome(4, 15);
+        diceEvent.addOutcome(5, 30);
+        diceEvent.addOutcome(6, 0);
+
+        diceEvent.simulateEvent(100);
+
+        // Example: Flipping a coin
+        BiasedEvent<String> coinEvent = new BiasedEvent<>();
+        coinEvent.addOutcome("Head", 35);
+        coinEvent.addOutcome("Tail", 65);
+
+        coinEvent.simulateEvent(100);
+    }
+}
+
+output--
+
+
+
+
